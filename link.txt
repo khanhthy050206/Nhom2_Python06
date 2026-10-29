@@ -1,0 +1,2 @@
+Sau khi tạo repository GitHub công khai, thay dòng dưới bằng URL thật của nhóm:
+https://github.com/USERNAME/REPOSITORY
