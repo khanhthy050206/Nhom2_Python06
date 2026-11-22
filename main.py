@@ -1,67 +1,103 @@
-from quan_ly_nha_hang import QuanLyNhaHang
 from ban_an import BanAn
 from dat_ban import DatBan
+from quan_ly_nha_hang import QuanLyNhaHang
 
 
-def nhap_du_lieu():
-    """Chạy thử nghiệp vụ qua menu Terminal."""
-    ql = QuanLyNhaHang()
+def nhap_ban(ql):
+    ma_ban = input("Mã bàn: ").strip()
+    ten_ban = input("Tên bàn: ").strip()
+    khu_vuc = input("Khu vực: ").strip()
+    suc_chua = int(input("Sức chứa: ").strip())
+    ban = BanAn.from_dict({
+        "ma_ban": ma_ban,
+        "ten_ban": ten_ban,
+        "khu_vuc": khu_vuc,
+        "suc_chua": suc_chua,
+        "trang_thai": "Trống",
+    })
+    ql.them_ban(ban)
+    print("Đã thêm bàn.")
 
+
+def dat_ban(ql):
+    ma_dat = input("Mã đặt bàn: ").strip()
+    ma_ban = input("Mã bàn: ").strip()
+    so_dien_thoai = input("Số điện thoại khách: ").strip()
+    so_nguoi = int(input("Số người: ").strip())
+    ngay_gio = input("Ngày giờ (YYYY-MM-DD HH:MM): ").strip()
+    dat = DatBan.from_dict({
+        "ma_dat": ma_dat,
+        "ma_ban": ma_ban,
+        "so_dien_thoai": so_dien_thoai,
+        "so_nguoi": so_nguoi,
+        "ngay_gio": ngay_gio,
+        "trang_thai": "Đã đặt",
+    })
+    ql.dat_ban(dat)
+    print("Đặt bàn thành công.")
+
+
+def tim_ban(ql):
+    ma_ban = input("Mã bàn cần tìm: ").strip()
+    ban = ql.lay_ban(ma_ban)
+    if ban is None:
+        print("Không tìm thấy bàn.")
+    else:
+        print(f"Bàn {ban.ma_ban} | {ban.ten_ban} | Khu vực: {ban.khu_vuc} "
+              f"| Sức chứa: {ban.suc_chua} | Trạng thái: {ban.trang_thai}")
+
+
+def tim_theo_sdt(ql):
+    sdt = input("Số điện thoại cần tìm: ").strip()
+    ket_qua = ql.tim_theo_sdt(sdt)
+    if not ket_qua:
+        print("Không có lượt đặt nào khớp.")
+    for d in ket_qua:
+        print(f"{d.ma_dat} | Bàn {d.ma_ban} | SĐT {d.so_dien_thoai} | "
+              f"{d.so_nguoi} người | {d.ngay_gio} | {d.trang_thai}")
+
+
+def huy_dat(ql):
+    ma_dat = input("Mã đặt bàn cần hủy: ").strip()
+    if ql.huy_dat_ban(ma_dat):
+        print("Đã hủy đặt bàn.")
+    else:
+        print("Không tìm thấy mã đặt bàn.")
+
+
+def menu():
+    ql = QuanLyNhaHang("data")
     while True:
-        print("\n===== QUẢN LÝ ĐẶT BÀN NHÀ HÀNG =====")
+        print("\n===== QUẢN LÝ NHÀ HÀNG =====")
         print("1. Thêm bàn")
-        print("2. Xem danh sách bàn")
-        print("3. Đặt bàn")
-        print("4. Xem danh sách đặt bàn")
-        print("5. Tìm kiếm đặt bàn")
-        print("6. Hủy đặt bàn")
+        print("2. Đặt bàn")
+        print("3. Tìm bàn theo mã")
+        print("4. Tìm đặt bàn theo số điện thoại")
+        print("5. Hủy đặt bàn")
+        print("6. Thống kê")
         print("0. Thoát")
-
         chon = input("Chọn chức năng: ").strip()
         try:
             if chon == "1":
-                ban = BanAn(
-                    input("Mã bàn: "), input("Tên bàn: "),
-                    int(input("Sức chứa: ")), input("Khu vực: ") or "Tầng 1"
-                )
-                ql.them_ban(ban)
-                print("Đã thêm bàn.")
+                nhap_ban(ql)
             elif chon == "2":
-                for ban in ql.ds_ban:
-                    print(ban)
-                if not ql.ds_ban:
-                    print("Chưa có bàn.")
+                dat_ban(ql)
             elif chon == "3":
-                dat = DatBan(
-                    input("Mã đặt: "), input("Mã bàn: "), input("Tên khách: "),
-                    input("Số điện thoại: "), input("Ngày giờ (YYYY-MM-DD HH:MM): "),
-                    int(input("Số người: ")), input("Ghi chú: ")
-                )
-                ql.dat_ban(dat)
-                print("Đặt bàn thành công.")
+                tim_ban(ql)
             elif chon == "4":
-                for dat in ql.ds_dat:
-                    print(dat)
-                if not ql.ds_dat:
-                    print("Chưa có lượt đặt.")
+                tim_theo_sdt(ql)
             elif chon == "5":
-                sdt = input("Nhập số điện thoại (bỏ trống nếu không lọc): ")
-                ngay = input("Nhập ngày YYYY-MM-DD (bỏ trống nếu không lọc): ")
-                for dat in ql.tim_kiem_dat_ban(sdt, ngay):
-                    print(dat)
+                huy_dat(ql)
             elif chon == "6":
-                if ql.huy_dat_ban(input("Mã đặt cần hủy: ")):
-                    print("Đã hủy đặt bàn.")
-                else:
-                    print("Không tìm thấy mã đặt.")
+                ql.in_thong_ke()
             elif chon == "0":
-                print("Kết thúc chương trình.")
+                print("Thoát chương trình.")
                 break
             else:
                 print("Lựa chọn không hợp lệ.")
-        except (ValueError, TypeError) as e:
-            print("Lỗi:", e)
+        except ValueError as e:
+            print(f"Lỗi: {e}")
 
 
 if __name__ == "__main__":
-    nhap_du_lieu()
+    menu()
